@@ -1,56 +1,162 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-// Desafio Tetris Stack
-// Tema 3 - Integração de Fila e Pilha
-// Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
-// Use as instruções de cada nível para desenvolver o desafio.
+#define MAX 5
+// estrutura 'Peca'
+typedef struct {
+char tipo;
+int id;
+}Peca;
 
-int main() {
+// estrutura de dados 'Fila' que comporta um array do tipo 'Peca' (a estrutura supracitada)
+typedef struct {
+Peca conjunto[MAX];
+int inicio;
+int fim;
+int total;
+}Fila;
 
-    // 🧩 Nível Novato: Fila de Peças Futuras
-    //
-    // - Crie uma struct Peca com os campos: tipo (char) e id (int).
-    // - Implemente uma fila circular com capacidade para 5 peças.
-    // - Crie funções como inicializarFila(), enqueue(), dequeue(), filaCheia(), filaVazia().
-    // - Cada peça deve ser gerada automaticamente com um tipo aleatório e id sequencial.
-    // - Exiba a fila após cada ação com uma função mostrarFila().
-    // - Use um menu com opções como:
-    //      1 - Jogar peça (remover da frente)
-    //      0 - Sair
-    // - A cada remoção, insira uma nova peça ao final da fila.
+// prototipos de funcao
+void Menu(Fila *f);
+void inicializarFila(Fila *f);
+void inserir(Fila *f, Peca pp);
+void remover(Fila *f, Peca *p);
+void exibirFila(Fila *f);
+void gerarPeca(Peca *p, int idGerado);
+void mainMenu(Fila *f);
 
+// funcao principal, onde o programa de fato roda
+int main(){
+    srand(time(NULL));
 
+    Fila minhaFila;
+    inicializarFila(&minhaFila);
 
-    // 🧠 Nível Aventureiro: Adição da Pilha de Reserva
-    //
-    // - Implemente uma pilha linear com capacidade para 3 peças.
-    // - Crie funções como inicializarPilha(), push(), pop(), pilhaCheia(), pilhaVazia().
-    // - Permita enviar uma peça da fila para a pilha (reserva).
-    // - Crie um menu com opção:
-    //      2 - Enviar peça da fila para a reserva (pilha)
-    //      3 - Usar peça da reserva (remover do topo da pilha)
-    // - Exiba a pilha junto com a fila após cada ação com mostrarPilha().
-    // - Mantenha a fila sempre com 5 peças (repondo com gerarPeca()).
+    mainMenu(&minhaFila);
 
-
-    // 🔄 Nível Mestre: Integração Estratégica entre Fila e Pilha
-    //
-    // - Implemente interações avançadas entre as estruturas:
-    //      4 - Trocar a peça da frente da fila com o topo da pilha
-    //      5 - Trocar os 3 primeiros da fila com as 3 peças da pilha
-    // - Para a opção 4:
-    //      Verifique se a fila não está vazia e a pilha tem ao menos 1 peça.
-    //      Troque os elementos diretamente nos arrays.
-    // - Para a opção 5:
-    //      Verifique se a pilha tem exatamente 3 peças e a fila ao menos 3.
-    //      Use a lógica de índice circular para acessar os primeiros da fila.
-    // - Sempre valide as condições antes da troca e informe mensagens claras ao usuário.
-    // - Use funções auxiliares, se quiser, para modularizar a lógica de troca.
-    // - O menu deve ficar assim:
-    //      4 - Trocar peça da frente com topo da pilha
-    //      5 - Trocar 3 primeiros da fila com os 3 da pilha
-
-
-    return 0;
+return 0;
 }
 
+
+void mainMenu(Fila *f) {
+    printf("TETRIS (inserir aquela musiquinha legal)\n");
+    printf("=============================\n");
+    int opcao;
+    Peca pecaTemporaria;
+    char entrada;
+    static int contadorId = 0;
+
+    do {
+
+    printf("Opções:\n");
+    printf("[1] - JOGAR PEÇA\n");
+    printf("[2] - INSERIR NOVA PEÇA\n");
+    printf("[3] - PECAS DISPONIVEIS\n");
+    printf("[0] - SAIR DO JOGO\n\n\n");
+    printf("OPCAO: ");
+    scanf("%d", &opcao);
+    printf("\n\n");
+    switch (opcao) {
+        
+        //"[1] - JOGAR PEÇA"
+        case 1: 
+            do {
+            // validando escolha do jogador
+            char escolha;
+            exibirFila(f);
+            printf("Jogar peca? (S/N)\n");
+            scanf(" %c", &escolha);
+
+            // se sim, vamos jogar a peca
+            if (escolha == 'S' || escolha == 's') {
+                printf("\nJogando a primeira peca...\n");
+                remover(f, &pecaTemporaria);
+                exibirFila(f);
+                break;
+            }
+
+            // se nao, cancelar a operacao que o usuario cogitou fazer quando selecionou a opcao [1]
+            else if (escolha == 'N' || escolha == 'n') {
+                printf("Ok! Peca nao sera jogada.\n");
+                break;
+            }
+
+            // se n digitou N(n) ou S(s), vai repetir a pergunta dps de dizer que a escolha eh invalida 
+            else { 
+                printf("[!] - Escolha invalida\n");
+            }
+
+        } while (1);
+        break;
+    
+        case 2:
+        printf("Pegando nova peca...\n");
+        // gera a peca em uma variavel temporaria de peca;
+        gerarPeca(&pecaTemporaria, contadorId);
+
+        // insere essa variavel pecaTemporaria na fila 
+        inserir(f, pecaTemporaria);
+        
+        // autoexplicativo, mas cumpre a exigencia de exibir a fila a cada interacao do usuario.
+        exibirFila(f);
+
+        // incrementa o contador de id, pra sempre que criar uma peca nova ele incrementar o id global que gerencia os ids das pecas.
+        contadorId++;
+        break;
+
+        case 3:
+        // literalmente isso mesmo. exibe as pecas que o usuario tem a disposicao
+        printf("Peças atuais: \n");
+        exibirFila(f);
+    } 
+} while (opcao != 0);
+// enquanto o usuario n apertar pra quitar, o menu estara em loop
+}
+
+
+// CORPO DAS FUNCOES QUE INTEGRAM O MENU!! 
+
+void inicializarFila(Fila *f){
+    f->inicio = 0;
+    f->fim = 0;
+    f->total = 0;
+}
+
+void inserir(Fila *f, Peca pp){
+    if(f->total == MAX) {
+        printf("[!] - Fila cheia\n\n");
+        return;
+    }
+    f->conjunto[f->fim] = pp;
+    f->fim = (f->fim + 1) % MAX;
+    f->total++;
+}
+
+void remover(Fila *f, Peca *p){
+    if(f->total == 0){
+        printf("[!] - Fila vazia\n\n");
+        return;
+    }
+    *p = f->conjunto[f->inicio];
+    f->inicio = (f->inicio + 1) % MAX;
+    f->total--;
+
+}
+
+void exibirFila(Fila *f){
+    if (f->total == 0){
+    printf("[!] - Fila vazia\n\n");
+    return;
+    }
+
+    printf("Fila:");
+    for (int i = 0, idx = f->inicio; i < f->total; i++, idx = (idx + 1) % MAX) {
+    printf("\nPEÇA: %c (ID: %d)\n\n", f->conjunto[idx].tipo, f->conjunto[idx].id);        
+    }
+}
+
+void gerarPeca(Peca* p, int idGerado) {
+    char tipos [] = {'I', 'O', 'T', 'L'};
+    p->tipo = tipos[rand() % 4];
+    p->id = idGerado;
+}
